@@ -1,6 +1,8 @@
 const comentarioCtrl = {};
 
 const Comentario = require('../Models/comentario.model');
+const Publicacion = require('../Models/publicacion.model');
+const Usuario = require('../Models/usuario.model');
 
 comentarioCtrl.getComent = async (req, res) => {
     const comentarios = await Comentario.find();
@@ -21,6 +23,24 @@ comentarioCtrl.createComent = async (req, res) => {
 comentarioCtrl.getComentario = async (req, res) => {
     const comentario = await Comentario.findById(req.params.id);
     res.json(comentario);
+};
+
+comentarioCtrl.getTodo = async (req, res) => {
+  Comentario.find({ autor: req.params.id })
+  .populate({
+    path: 'publicacion',
+    populate: {
+      path: 'autor'
+    }
+  })
+  .populate('autor')
+  .exec((err, comentarios) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    const publicaciones = comentarios.map(comentario => comentario.publicacion);
+    res.status(200).json({ publicaciones, comentarios });
+  });
 };
 
 comentarioCtrl.deleteComent = async (req, res) => {

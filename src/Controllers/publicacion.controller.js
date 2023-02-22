@@ -33,7 +33,7 @@ publicacionCtrl.getComentariosPublicacion = (req, res) => {
         }
         res.status(200).json(comentarios);
       });
-  };
+};
 
 publicacionCtrl.deletePost = async (req, res) => {
     await Publicacion.findByIdAndDelete(req.params.id);
@@ -49,5 +49,24 @@ publicacionCtrl.updatePost = async (req, res) => {
     });
     res.json({ message: 'Publicacion actualizada' });
 };
+
+publicacionCtrl.buscarPublicaciones = (req, res) => {
+    const busqueda = req.query.busqueda;
+    const regex = new RegExp(busqueda, 'i');
+  
+    Publicacion.find({
+      $or: [
+        { titulo: regex },
+        { contenido: regex }
+      ]
+    })
+      .populate('autor')
+      .exec((err, publicaciones) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        res.status(200).json(publicaciones);
+      });
+  };
 
 module.exports = publicacionCtrl;
